@@ -26,8 +26,10 @@ NUM_CHANNEL = 3
 NUM_CLASSES = 5
 # Model parameters
 learning_rate = 1e-3
+snapshot_step = 300
+epochs = 3
 batch_size = 32
-keep_prob = 0.8
+keep_prob = 0.2
 kernel_size = 5
 pool_stride = 2
 hl1_depth = 8
@@ -41,41 +43,52 @@ fc2_size = 1024
 # Pre process the data
 features = Features(data_dir=DATA_DIR, image_size=IMAGE_SIZE)
 dataset = features.create(save=True, save_file='datasets.npy', gray=False, flatten=False)
-X_train, y_train, X_test, y_test, val_X, val_y = features.train_test_split(dataset, test_size=0.1, valid_portion=0.1)
+X_train, y_train, X_test, y_test, X_val, y_val = features.train_test_split(dataset, test_size=0.1, valid_portion=0.1)
 
 # Build the network
 net = input_data(shape=[None, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNEL], name="input")
 # Hidden layer 1
 net = conv_2d(net, hl1_depth, kernel_size, activation='relu')
-net = max_pool_2d(net, kernel_size, pool_stride)
+net = max_pool_2d(net, kernel_size)
 # Hidden layer 2
 net = conv_2d(net, hl2_depth, kernel_size, activation='relu')
-net = max_pool_2d(net, kernel_size, pool_stride)
+net = max_pool_2d(net, kernel_size)
 # Hidden layer 3
 net = conv_2d(net, hl3_depth, kernel_size, activation='relu')
-net = max_pool_2d(net, kernel_size, pool_stride)
+net = max_pool_2d(net, kernel_size)
 # Hidden layer 4
 net = conv_2d(net, hl4_depth, kernel_size, activation='relu')
-net = max_pool_2d(net, kernel_size, pool_stride)
+net = max_pool_2d(net, kernel_size)
 # Hidden layer 5
 net = conv_2d(net, hl5_depth, kernel_size, activation='relu')
-net = max_pool_2d(net, kernel_size, pool_stride)
+net = max_pool_2d(net, kernel_size)
 # Fully connected layer 1
 net = fully_connected(net, fc1_size, activation='relu')
-net = dropout(net, keep_prob)
+# net = dropout(net, keep_prob)
 # Fully connected layer 2
-net = fully_connected(net, fc2_size, activation='softmax')
+net = fully_connected(net, fc2_size, activation='relu')
+net = dropout(net, keep_prob)
+# Softmax layer
+net = fully_connected(net, NUM_CLASSES, activation='softmax')
 net = dropout(net, keep_prob)
 # Output layer
 net = regression(net, optimizer='adam',
                  loss='categorical_crossentropy',
                  learning_rate=learning_rate,
-                 batch_size=batch_size,
                  name='output')
 # Define the model (DeepNeuralNetwork)
-model = tflearn.DNN(net, tensorboard_dir='logs', checkpoint_path=CHKPT_PATH)
+model = tflearn.DNN(net, tensorboard_dir=TENSORBOARD_DIR, checkpoint_path=CHKPT_PATH)
 
 # Check if there's a saved model
-if os.path.exists('{}.meta'.format(MODEL_NAME)):
+if os.path.exists(os.path.join(LOG_DIR, '{}.meta'.format(MODEL_NAME))):
     model.load(MODEL_NAME)
     print('Model loaded!')
+else:
+    # Train the model
+    model.fit(X_inputs={'input': X_train}, Y_targets={'output': y_train},
+              n_epoch=epochs, validation_set=({'input': X_val}, {'output': y_val}),
+              show_metric=True, batch_size=batch_size, snapshot_step=300, run_id=MODEL_NAME)
+
+pred = model.predict(X_test)
+print('true =', y_test)
+print('pred =', pred)
