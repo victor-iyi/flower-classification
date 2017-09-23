@@ -21,12 +21,12 @@ TENSORBOARD_DIR = os.path.join(LOG_DIR, 'tensorboard')
 CHKPT_PATH = os.path.join(LOG_DIR, 'checkpoints')
 MODEL_NAME = os.path.join(LOG_DIR, '5-layer-convnet.model')
 # Dimensionality parameters
-IMAGE_SIZE = 32
+IMAGE_SIZE = 50
 NUM_CHANNEL = 3
 NUM_CLASSES = 5
 # Model parameters
 learning_rate = 1e-3
-snapshot_step = 300
+# snapshot_step = 300
 epochs = 3
 batch_size = 32
 keep_prob = 0.2
@@ -73,9 +73,9 @@ net = fully_connected(net, NUM_CLASSES, activation='softmax')
 net = dropout(net, keep_prob)
 # Output layer
 net = regression(net, optimizer='adam',
-                 loss='categorical_crossentropy',
                  learning_rate=learning_rate,
-                 name='output')
+                 loss='categorical_crossentropy',
+                 name='targets')
 # Define the model (DeepNeuralNetwork)
 model = tflearn.DNN(net, tensorboard_dir=TENSORBOARD_DIR, checkpoint_path=CHKPT_PATH)
 
@@ -85,10 +85,10 @@ if os.path.exists(os.path.join(LOG_DIR, '{}.meta'.format(MODEL_NAME))):
     print('Model loaded!')
 else:
     # Train the model
-    model.fit(X_inputs={'input': X_train}, Y_targets={'output': y_train},
-              n_epoch=epochs, validation_set=({'input': X_val}, {'output': y_val}),
-              show_metric=True, batch_size=batch_size, snapshot_step=300, run_id=MODEL_NAME)
+    model.fit(X_inputs={'input': X_train}, Y_targets={'targets': y_train},
+              n_epoch=epochs, validation_set=({'input': X_test}, {'targets': y_test}),
+              show_metric=True, batch_size=batch_size, run_id=MODEL_NAME)
 
-pred = model.predict(X_test)
-print('true =', y_test)
-print('pred =', pred)
+# pred = model.predict(X_test)
+# print('true =', y_test)
+# print('pred =', pred)
