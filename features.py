@@ -1,6 +1,13 @@
+"""
+  @author Victor I. Afolabi
+  A.I. Engineer & Software developer
+  javafolabi@gmail.com
+  Created on 23 September, 2017 @ 7:06 PM.
+  Copyright © 2017. Victor. All rights reserved.
+"""
+
 # coding: utf-8
 
-# In[1]:
 import os
 import sys
 
@@ -9,7 +16,6 @@ from PIL import Image
 from tqdm import tqdm
 
 
-# In[2]:
 class Features(object):
     def __init__(self, data_dir='dataset/flowers', image_size=150):
         self.data_dir = data_dir
@@ -64,7 +70,6 @@ class Features(object):
         return labels
 
 
-# In[3]:
 if __name__ == '__main__':
     features = Features()
     datasets = features.create()
