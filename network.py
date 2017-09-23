@@ -5,6 +5,7 @@
   Created on 23 September, 2017 @ 7:26 PM.
   Copyright © 2017. Victor. All rights reserved.
 """
+import os
 import tflearn
 
 from features import Features
@@ -12,9 +13,13 @@ from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.conv import conv_2d, max_pool_2d
 from tflearn.layers.estimator import regression
 
+# Files and directories
 DATA_DIR = 'dataset/flowers/'
-TENSORBOARD_DIR = 'tb_logs'
-CHKPT_DIR = 'chkpt'
+LOG_DIR = 'logs/'
+TENSORBOARD_DIR = os.path.join(LOG_DIR, 'tensorboard')
+CHKPT_PATH = os.path.join(LOG_DIR, 'checkpoints')
+MODEL_NAME = os.path.join(LOG_DIR, '5-layer-convnet.model')
+# Dimensionality parameters
 IMAGE_SIZE = 32
 NUM_CHANNEL = 3
 NUM_CLASSES = 5
@@ -66,4 +71,4 @@ net = regression(net, optimizer='adam',
                  learning_rate=learning_rate,
                  batch_size=batch_size)
 # Define the model (DeepNeuralNetwork)
-model = tflearn.DNN(net, tensorboard_dir='logs', checkpoint_path='tf_ckpt')
+model = tflearn.DNN(net, tensorboard_dir='logs', checkpoint_path=CHKPT_PATH)
