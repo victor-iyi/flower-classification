@@ -48,6 +48,8 @@ class Features(object):
                 Neural Networks.
         :return: datasets: `np.ndarray` consisting of `np.array` of "features" and "labels".
         """
+        if os.path.isfile(save_file):
+            return np.load(save_file)
         datasets = []
         for flower in self.flowers:
             image_dir = os.path.join(self.data_dir, flower)
@@ -126,15 +128,11 @@ class Features(object):
 if __name__ == '__main__':
     features = Features()
     datasets = features.create()
-    train_X, train_y, test_X, test_y = features.train_test_split(datasets)
+    train_X, train_y, test_X, test_y, val_X, val_y = features.train_test_split(datasets, valid_portion=0.1)
 
-    print('\nFirst training example:')
-    print(train_X[0])
-    print(train_y[0])
+    print('Training set ->', train_X.shape, test_X.shape, val_X.shape)
+    print('Testing set ->', train_y.shape, test_y.shape, val_y.shape)
 
-    print('\nFirst testing examples:')
-    print(test_X[0])
-    print(test_y[0])
-
-    print('\nLength of training sets: {:,}'.format(len(train_X)))
-    print('Length of testing sets:  {:,}\n'.format(len(test_X)))
+    print('\nLength of training sets:\t\t{:,}'.format(len(train_y)))
+    print('Length of testing sets: \t\t{:,}'.format(len(test_y)))
+    print('Length of validation sets:  {:,}\n'.format(len(val_y)))
