@@ -42,11 +42,14 @@ fc2_size = 1024
 
 # Pre process the data
 features = Features(data_dir=DATA_DIR, image_size=IMAGE_SIZE)
-dataset = features.create(save=True, save_file='datasets.npy', gray=False, flatten=False)
-X_train, y_train, X_test, y_test, X_val, y_val = features.train_test_split(dataset, test_size=0.1, valid_portion=0.1)
+dataset = features.create(save=True, save_file='datasets.npy',
+                          gray=False, flatten=False)
+data = features.train_test_split(dataset, test_size=0.1, valid_portion=0.1)
+X_train, y_train, X_test, y_test, X_val, y_val = data
 
 # Build the network
-net = input_data(shape=[None, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNEL], name="input")
+net = input_data(shape=[None, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNEL],
+                 name="input")
 # Hidden layer 1
 net = conv_2d(net, hl1_depth, kernel_size, activation='relu')
 net = max_pool_2d(net, kernel_size)
@@ -77,7 +80,8 @@ net = regression(net, optimizer='adam',
                  loss='categorical_crossentropy',
                  name='targets')
 # Define the model (DeepNeuralNetwork)
-model = tflearn.DNN(net, tensorboard_dir=TENSORBOARD_DIR, checkpoint_path=CHKPT_PATH)
+model = tflearn.DNN(net, tensorboard_dir=TENSORBOARD_DIR,
+                    checkpoint_path=CHKPT_PATH)
 
 # Check if there's a saved model
 if os.path.exists(os.path.join(LOG_DIR, '{}.meta'.format(MODEL_NAME))):
@@ -86,7 +90,8 @@ if os.path.exists(os.path.join(LOG_DIR, '{}.meta'.format(MODEL_NAME))):
 else:
     # Train the model
     model.fit(X_inputs={'input': X_train}, Y_targets={'targets': y_train},
-              n_epoch=epochs, validation_set=({'input': X_test}, {'targets': y_test}),
+              n_epoch=epochs,
+              validation_set=({'input': X_test}, {'targets': y_test}),
               show_metric=True, batch_size=batch_size, run_id=MODEL_NAME)
 
 # pred = model.predict(X_test)
