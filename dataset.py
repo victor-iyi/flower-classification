@@ -185,8 +185,12 @@ class ImageDataset(Dataset):
         self._y = np.array([label for label in datasets[:,1]])
     
     @property
+    def images(self):
+        return self._X
+    
+    @property
     def channels(self):
-        return 1 if len(self._X[0].shape) == 2 else self.X[0].shape[-1]
+        return 1 if len(self._X[0].shape) <= 2 else self._X[0].shape[-1]
 
 
 # `TextDataset` for textual dataset
@@ -198,7 +202,7 @@ class TextDataset(Dataset):
 
 if __name__ == '__main__':
     data_dir = 'datasets/flowers'
-    save_file = 'datasets/saved/features-{0}x{0}.pkl')
+    save_file = 'datasets/saved/features-{0}x{0}.pkl'
 
     data = ImageDataset(data_dir=data_dir)
     data.create()  # creates features & label
