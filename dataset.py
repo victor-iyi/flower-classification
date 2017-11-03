@@ -154,7 +154,15 @@ class ImageDataset(Dataset):
         self._process()
         self._num_examples = self._X.shape[0]
         self._epochs_completed = 0
-        self._index_in_epoch = 0
+        self._index_in_epoch =
+
+    @property
+    def images(self):
+        return self._X
+    
+    @property
+    def channels(self):
+        return 1 if len(self._X[0].shape) <= 2 else self._X[0].shape[-1]
         
     def _process(self):
         datasets = []
@@ -183,14 +191,6 @@ class ImageDataset(Dataset):
         np.random.shuffle(datasets)
         self._X = np.array([img for img in datasets[:,0]])
         self._y = np.array([label for label in datasets[:,1]])
-    
-    @property
-    def images(self):
-        return self._X
-    
-    @property
-    def channels(self):
-        return 1 if len(self._X[0].shape) <= 2 else self._X[0].shape[-1]
 
 
 # `TextDataset` for textual dataset
