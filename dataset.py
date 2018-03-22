@@ -18,8 +18,8 @@ import numpy as np
 # Base `Dataset` class
 class Dataset(object):
     def __init__(self, data_dir, **kwargs):
-        """
-        Dataset pre-processing class
+        """Dataset pre-processing class.
+        
         :param data_dir:
             top level directory where data resides
         :param kwargs:
@@ -134,25 +134,28 @@ class Dataset(object):
             np.array of [train_X, train_y, test_X, test_y, val_X, val_y] if
             `valid_portion` is set
         """
-        test_size = int(len(self._X) * test_size)
-
-        train_X = self._X[:-test_size]
-        train_y = self._y[:-test_size]
-        test_X = self._X[-test_size:]
-        test_y = self._y[-test_size:]
-
+        from sklearn import model_selection as ms
+        
+        # Split dataset.
+        train_X, test_X, train_y, test_y = ms.train_test_split(self._X, self._y, 
+                                                               test_size=test_size)
+        
         if 'valid_portion' in kwargs:
+            # Keyword arguement.
             valid_portion = kwargs['valid_portion']
-            valid_portion = int(len(train_X) * valid_portion)
+            
+            # Split training data for validation set.
+            train_X, val_X, train_y, val_y = ms.train_test_split(train_X, train_y)
 
-            train_X = train_X[:-valid_portion]
-            train_y = train_y[:-valid_portion]
-            val_X = train_X[-valid_portion:]
-            val_y = train_y[-valid_portion:]
             return np.array([train_X, train_y, test_X, test_y, val_X, val_y])
 
         return np.array([train_X, train_y, test_X, test_y])
 
+    @property
+    def classes(self):
+        __classes = [c.title() for c in os.listdir(self._data_dir) if c[0] is not '.']
+        return __classes
+    
     @property
     def features(self):
         return self._X
@@ -196,22 +199,24 @@ class ImageDataset(Dataset):
         self.grayscale = grayscale
         self.flatten = flatten
         self.size = size
-
+        # List all the folders.
+        
         self._labels = [l for l in os.listdir(self._data_dir) if l[0] is not '.']
+        
         try:
             from PIL import Image
         except Exception as e:
-            raise ModuleNotFoundError('{}'.format(e))
+            raise ModuleNotFoundError(f'{e}')
+        
         # First image
         img_dir = os.path.join(self._data_dir, self._labels[0])
         img_file = os.path.join(img_dir, os.listdir(img_dir)[1])
         img = self.__create_image(img_file, return_obj=True)
         self._channel = img.im.bands
-        # free memory
-        del img_dir
-        del img_file
-        del img
-
+        
+        # Free memory
+        del img, img_file, img_dir
+    
     @property
     def images(self):
         return self._X
